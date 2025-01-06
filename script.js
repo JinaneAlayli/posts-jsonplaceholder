@@ -20,20 +20,25 @@ function fetchPosts() {
                 postsContainer.innerHTML = "<p>No posts available</p>";
             } else {
                 posts.forEach(post => {
-                    const postElement = document.createElement("div");
-                    postElement.classList.add("post");
-                    postElement.innerHTML = `
-                        <img src="post.png" alt="Post Image">
-                        <div class="post-title">${post.title}</div>
-                        <div class="post-slug">${post.slug || "No Slug"}</div>`;
+                    fetch(`https://jsonplaceholder.typicode.com/users/${post.userId}`)
+                        .then(response => response.json())
+                        .then(user => {
+                            const postElement = document.createElement("div");
+                            postElement.classList.add("post");
+                            postElement.innerHTML = `
+                                <img src="post.png" alt="Post Image">
+                                <div class="post-title">${post.title}</div>
+                                <div class="post-username">By: ${user.username}</div>
+                            `;
 
-                    postElement.addEventListener("click", () => {
-                        //window.location.href = `post.html?postId=${post.id}`;
-                        localStorage.setItem("postId", post.id);
-                        window.location.href = "post.html";
-                    });
+                            postElement.addEventListener("click", () => {
+                                const urlParams = new URLSearchParams({ postId: post.id });
+                                // localStorage.setItem("postId", post.id);
+                                window.location.href = `post.html?${urlParams}`;
+                            });
 
-                    postsContainer.appendChild(postElement);
+                            postsContainer.appendChild(postElement);
+                        });
                 });
             }
         })
@@ -45,8 +50,8 @@ function fetchPosts() {
 
 //  post's details and comments
 function fetchPostDetails(postid) {
-    //const urlParams = new URLSearchParams(window.location.search);
-   // const postId = urlParams.get("postId");
+    const urlParams = new URLSearchParams(window.location.search);
+    const postId = urlParams.get("postId");
     if (postid) {
         fetch(`https://jsonplaceholder.typicode.com/posts/${postid}`)
             .then(response => response.json())
